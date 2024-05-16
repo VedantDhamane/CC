@@ -1,129 +1,65 @@
-#include <stdio.h>
-#include <string.h>
+#include<stdio.h>
+#include<string.h>
+#define S 70
 
-char flag[] = {'0', '1', '1', '1', '1', '1', '1', '0'};
-#define s 50
+char data1[S];
+char data2[S];
+char flag[]={'0','1','1','1','1','1','1','0'};
 
-void receiver(char data[]){
-    char res[s];
-    int z, j, k = 0;
-    int count = 0;
-    for (int i = 0; i < strlen(data); i++)
-{
-        count = 0;
-        if (data[i] == '0'){
-            count++;
-            for (j = i + 1; j < i + 8; j++){
-                if (data[j] == '1'){
-                    count++;
-                }
-                else{
-                    break;
-                }
-            }
-        }
-        if (count == 7){
-            i = j;
-        }
-        else{
-            res[k++] = data[i];
-        }
-    }
-    res[strlen(data) - 16] = '\0';
-    printf("Data after Flag bytes dropped by reciever: %s\n", res);
-    k = 0;
-    int count1 = 0;
-    for (int i = 0; i < strlen(res); i++){
-        count = 0;
-
-        if (res[i] == '0'){
-            data[k++] = res[i];
-            for (int j = i + 1; j < i + 7; j++){
-                if (res[j] == '1'){
-                    data[k++] = res[j];
-                    count++;
-                }
-                else{
-                    break;
-                }
-            }
-        }
-
-        if (count == 5){
-            i = j;
-            count1++;
-        }
-        else
-        {
-            data[k++] = res[i];
-        }
-    }
-    data[strlen(res) - count1] = '\0';
-    printf("Orignal Data recieved: %s\n", data);
+void sender();
+void reciver(char data1[]);
+void main(){
+    sender();
+    printf("Data to be sent: %s\n",data1);
+    reciver(data1);
+    printf("Recived Data: %s\n",data2);
 }
 
-int main()
-{
-    char data[s];
-    char data1[s];
-    printf("Enter the data: ");
-    scanf("%s", &data);
-    data[strlen(data)] = '\0';
+void sender(){
+    char data[S];
+    int count =0, k=0;
+    printf("Enter Data:");
+    scanf("%s",data);
+    for(int j=0; j<8; j++){
+        data1[k++] = flag[j];
+    }
+    for(int i=0; i<strlen(data); i++){
+        if(data[i]=='1'){
+            count++;
+        }else{
+            count=0;
+        }
 
-    // after zero --continous five 1's stuff zero.
-    int count = 0;
-    int count1 = 0;
-    int k = 0;
-    for (int i = 0; i < strlen(data); i++)
-    {
-
-        data1[k++] = data[i];
-        if (data[i] == '0')
-        {
-            count = 0;
-            for (int j = i + 1; j < i + 6; j++)
-            {
-                data1[k++] = data[j];
-                if (data[j] == '1')
-                {
-                    count++;
-                    if (count == 5)
-                    {
-                        count1++;
-                        data1[k++] = '0';
-                    }
-                }
-                else
-                {
-                    i = j;
-                    break;
-                }
-                i = j;
-            }
+        if(count==5){
+            data1[k++]=data[i];
+            data1[k++]='0';
+            count=0;
+        }
+        else{
+            data1[k++]=data[i];
         }
     }
-    data1[strlen(data) + count1] = '\0';
-    printf("Data after stuffing 0's: %s \n", data1);
+     for(int j=0; j<8; j++){
+        data1[k++] = flag[j];
+    }
+    data1[strlen(data1)]='\0';
+}
 
-    // flag.
-    for (int i = 0; i < strlen(data1) + 16; i++)
-    {
-        if (i < 8)
-        {
-            data[i] = flag[i];
+void reciver(char data1[]){
+    int len = strlen(data1)-8;
+    int count=0, k=0;
+    for(int i=8; i<len; i++){
+         if(data1[i]=='1'){
+            count++;
+        }else{
+            count=0;
         }
-        else if (i > strlen(data1) + 7)
-        {
-            data[i] = flag[i - strlen(data1) - 8];
-        }
-        else
-        {
-            data[i] = data1[i - 8];
+
+        if(count==5){
+            data2[k++] = data1[i];
+            i++;
+        }else{
+            data2[k++] = data1[i];
         }
     }
-
-    data[strlen(data1) + 16] = '\0';
-    printf("Final Data to be sent: %s\n", data);
-
-    receiver(data);
 }
